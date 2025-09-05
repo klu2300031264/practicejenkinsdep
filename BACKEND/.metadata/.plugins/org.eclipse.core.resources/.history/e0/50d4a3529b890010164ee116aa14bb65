@@ -1,0 +1,75 @@
+package com.klef.cicd.controller;
+
+	import java.util.List;
+	import org.springframework.beans.factory.annotation.Autowired;
+	import org.springframework.http.ResponseEntity;
+	import org.springframework.http.HttpStatus;
+	import org.springframework.web.bind.annotation.*;
+
+import com.klef.cicd.service.MovieService;
+
+
+	@RestController
+	@RequestMapping("/movieapi/")
+	@CrossOrigin(origins = "*")
+	public class MovieController {
+
+	    @Autowired
+	    private MovieService movieService;
+	    
+	    @GetMapping("/")
+	    public String home() {
+	        return "Movie Management API is running!";
+	    }
+
+	    // Add Movie
+	    @PostMapping("/add")
+	    public ResponseEntity<Movie> addMovie(@RequestBody Movie movie) {
+	        Movie savedMovie = movieService.addMovie(movie);
+	        return new ResponseEntity<>(savedMovie, HttpStatus.CREATED);
+	    }
+
+	    // Get All Movies
+	    @GetMapping("/all")
+	    public ResponseEntity<List<Movie>> getAllMovies() {
+	        List<Movie> movies = movieService.getAllMovies();
+	        return new ResponseEntity<>(movies, HttpStatus.OK);
+	    }
+
+	    // Get Movie By ID
+	    @GetMapping("/get/{id}")
+	    public ResponseEntity<?> getMovieById(@PathVariable int id) {
+	        Movie movie = movieService.getMovieById(id);
+	        if (movie != null) {
+	            return new ResponseEntity<>(movie, HttpStatus.OK);
+	        } else {
+	            return new ResponseEntity<>("Movie with ID " + id + " not found.", HttpStatus.NOT_FOUND);
+	        }
+	    }
+
+	    // Update Movie
+	    @PutMapping("/update")
+	    public ResponseEntity<?> updateMovie(@RequestBody Movie movie) {
+	        Movie existing = movieService.getMovieById(movie.getId());
+	        if (existing != null) {
+	            Movie updatedMovie = movieService.updateMovie(movie);
+	            return new ResponseEntity<>(updatedMovie, HttpStatus.OK);
+	        } else {
+	            return new ResponseEntity<>("Cannot update. Movie with ID " + movie.getId() + " not found.", HttpStatus.NOT_FOUND);
+	        }
+	    }
+
+	    // Delete Movie
+	    @DeleteMapping("/delete/{id}")
+	    public ResponseEntity<String> deleteMovie(@PathVariable int id) {
+	        Movie existing = movieService.getMovieById(id);
+	        if (existing != null) {
+	            movieService.deleteMovieById(id);
+	            return new ResponseEntity<>("Movie with ID " + id + " deleted successfully.", HttpStatus.OK);
+	        } else {
+	            return new ResponseEntity<>("Cannot delete. Movie with ID " + id + " not found.", HttpStatus.NOT_FOUND);
+	        }
+	    }
+	}
+
+
